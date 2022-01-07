@@ -10,7 +10,6 @@ const addSingleEmployee = async (req, res) => {
   };
   try {
     const singleEmployee = await Employee.create(info);
-    console.log(singleEmployee);
     res.status(200).send(singleEmployee);
   } catch (error) {
     res.status(200).send({ message: error });
@@ -21,7 +20,6 @@ const addSingleEmployee = async (req, res) => {
 const addManyEmployee = async (req, res) => {
   try {
     const employee = await Employee.bulkCreate(req.body);
-    console.log(employee);
     res.status(200).send(employee);
   } catch (error) {
     res.status(200).send({ message: error });
@@ -32,8 +30,22 @@ const addManyEmployee = async (req, res) => {
 
 const getAllEmployees = async (req, res) => {
   try {
-    const employees = await Employee.findAll({});
-    res.status(200).send(employees);
+    const count = await Employee.count({});
+    const page = req.query.page;
+    const pagelimit = parseInt(req.query.pagelimit);
+    let employees;
+    if (page) {
+      employees = await Employee.findAll({
+        offset: page * pagelimit,
+        limit: pagelimit,
+      });
+    } else {
+      employees = await Employee.findAll({});
+    }
+    res.status(200).send({
+      count,
+      employees,
+    });
   } catch (error) {
     res.status(200).send({ message: error });
   }
